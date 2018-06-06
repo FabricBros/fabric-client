@@ -1,6 +1,6 @@
 # fabric-client
 
-# implementation standards
+# implementation standards -- Please follow
 - Logger, use Apache log4j.
 
         private static Logger logger = Logger.getLogger(Class.class);
@@ -28,4 +28,6 @@ For example:
     MHC_FABRIC_NOSQL_CLOUDANTDB_SECRET
     
 - Install SonarLint pluggin and analyze your code and fix all major and critical issues before pushing.
+    
+    To use: install plugin then right click on Project's root > Analyze > Analyze with Sonar Lint
 
