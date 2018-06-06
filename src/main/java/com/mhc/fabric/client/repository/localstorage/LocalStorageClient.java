@@ -2,6 +2,10 @@ package com.mhc.fabric.client.repository.localstorage;
 
 import com.mhc.fabric.client.repository.Repository;
 
+/** Table is in relation to a fileName, just store/search for the file in the current path(projects path)
+ *
+ *
+ * **/
 public class LocalStorageClient implements Repository {
     @Override
     public void delete(String key) {
