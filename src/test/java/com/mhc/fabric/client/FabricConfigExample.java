@@ -35,14 +35,14 @@ public class FabricConfigExample {
 
     private FabricConfig getConfig() throws IOException {
 
-        FabricConfig fabricConfig = new FabricConfig();
+        FabricConfig configFromProp = new FabricConfig();
 
         Resource resource = new ClassPathResource("application.properties");
         Properties properties = new Properties();
         properties.load(resource.getInputStream());
 
-        fabricConfig.putAll(properties);
+        configFromProp.putAll(properties);
 
-        return fabricConfig;
+        return configFromProp;
     }
 }
