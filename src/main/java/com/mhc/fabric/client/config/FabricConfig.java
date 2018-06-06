@@ -1,4 +1,5 @@
-package com.mhc.fabric.client;
+package com.mhc.fabric.client.config;
+
 
 import java.util.Properties;
 
