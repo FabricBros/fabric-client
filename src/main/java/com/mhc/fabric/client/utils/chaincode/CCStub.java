@@ -1,4 +1,4 @@
-package com.mhc.fabric.client.utils;
+package com.mhc.fabric.client.utils.chaincode;
 
 import com.mhc.fabric.client.models.ChaincodeInfo;
 import org.hyperledger.fabric.sdk.HFClient;

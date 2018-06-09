@@ -7,5 +7,6 @@ public class FabricConfigParams {
     public static final String PRE = "mhc.fabric.";
     public static final String MHC_FABRIC_DYNAMODBID = PRE+"dynamodbId";
     public static final String MHC_FABRIC_DYNAMODBSECRET = PRE+"dynamodbSecret";
+    public static final String MHC_FABRIC_MAXENROLLMENT = PRE+"maxEnrollment";
 }
 
