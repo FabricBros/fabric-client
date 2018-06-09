@@ -20,12 +20,12 @@
 
 - Format for Config properties should follow this format:
 
-MHC_FABRIC_\<PACKAGE\>\_\<CLASS>_\<PROPERTY>
+MHC_FABRIC_\<PROPERTY>
 
 For example:
 
-    MHC_FABRIC_NOSQL_CLOUDANTDB_ID
-    MHC_FABRIC_NOSQL_CLOUDANTDB_SECRET
+    MHC_FABRIC_CLOUDANTID
+    MHC_FABRIC_CLOUDANTSECRET
     
 - Install SonarLint pluggin and analyze your code and fix all major and critical issues before pushing.
     

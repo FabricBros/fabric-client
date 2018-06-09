@@ -9,8 +9,8 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 import java.util.Properties;
 
-import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_NOSQL_DYNAMODB_ID;
-import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_NOSQL_DYNAMODB_SECRET;
+import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_DYNAMODBID;
+import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_DYNAMODBSECRET;
 import static org.junit.Assert.assertEquals;
 
 
@@ -29,8 +29,8 @@ public class FabricConfigExample {
 
     @Test
     public void testApplicationProperties(){
-        assertEquals("testid", fabricConfig.getProperty(MHC_FABRIC_NOSQL_DYNAMODB_ID));
-        assertEquals("testsecret", fabricConfig.getProperty(MHC_FABRIC_NOSQL_DYNAMODB_SECRET));
+        assertEquals("testid", fabricConfig.getProperty(MHC_FABRIC_DYNAMODBID));
+        assertEquals("testsecret", fabricConfig.getProperty(MHC_FABRIC_DYNAMODBSECRET));
     }
 
     private FabricConfig getConfig() throws IOException {
