@@ -13,6 +13,8 @@ import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
+import org.hyperledger.fabric_ca.sdk.exception.EnrollmentException;
+import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -25,12 +27,14 @@ public class UserUtils {
     SampleStore store;
     String mspId;
     FabricConfig fabricConfig;
+    String orgName;
 
 
     public UserUtils(FabricConfig fabricConfig, NetworkConfig networkConfig, SampleStore sampleStore){
         this.networkConfig = networkConfig;
         this.store = sampleStore;
         this.mspId = networkConfig.getClientOrganization().getMspId();
+        this.orgName = networkConfig.getClientOrganization().getName();
         this.fabricConfig = fabricConfig;
     }
 
@@ -40,19 +44,23 @@ public class UserUtils {
 
     /** Register's user, should throw exception if user is already registered
      * **/
-    public SampleUser registerUser(String user, String pw, String affiliation) throws Exception {
+    public SampleUser registerUser(String user, String pw, String affiliation) throws org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException, EnrollmentException, MalformedURLException, RegistrationException {
         NetworkConfig.CAInfo caInfo = networkConfig.getClientOrganization().getCertificateAuthorities().get(0);
 
-        SampleUser admin = store.getMember("admin", mspId);
-        SampleUser newUser = store.getMember(user, networkConfig.getClientOrganization().getName());
+        SampleUser admin = getAdmin();
+        SampleUser newUser = new SampleUser(user, orgName, store);
 
         if(newUser.isRegistered()){
             throw new IllegalArgumentException("user already registered");
         }
 
-//        RegistrationRequest rr = new RegistrationRequest(user, affiliation);
-        RegistrationRequest rr = RegistrationRequestUtil.getMemberRR(user, pw, affiliation, fabricConfig);
-        rr.setSecret(pw);
+        RegistrationRequest rr = null;
+        try {
+            rr = RegistrationRequestUtil.getMemberRR(user, pw, affiliation, fabricConfig);
+        } catch (Exception e) {
+            logger.error(e);
+            throw new IllegalArgumentException(e);
+        }
 
         //TODO figure out ways to implement different types of RR here
 
@@ -60,6 +68,41 @@ public class UserUtils {
         return newUser;
 
     }
+
+    public SampleUser getAdmin() throws MalformedURLException, org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException, EnrollmentException {
+        //check store
+        NetworkConfig.CAInfo caInfo = networkConfig.getClientOrganization().getCertificateAuthorities().get(0);
+        NetworkConfig.UserInfo userInfo = caInfo.getRegistrars().iterator().next();
+        String adminName = userInfo.getName();
+        String adminSecret = userInfo.getEnrollSecret();
+
+        //check store and make sure admin is enrolled
+        if(store.hasMember(adminName, orgName) && store.getMember(adminName, orgName).isEnrolled()){
+            return store.getMember(adminName, orgName);
+        }
+
+        //If not in store, get enrollment from ca and save to store
+        try {
+            HFCAClient hfcaClient = getHFCAClient(networkConfig.getClientOrganization().getCertificateAuthorities().get(0));
+            userInfo.setEnrollment(hfcaClient.enroll(adminName, adminSecret));
+        } catch (MalformedURLException e) {
+            logger.error(e);
+            throw e;
+        } catch (org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+            logger.error(e);
+            throw e;
+        } catch (EnrollmentException e) {
+            logger.error(e);
+            throw e;
+        }
+        //TODO Due to stupid sdk, we'll have to do this mapping, figure out a more efficient mapper
+        SampleUser adminUser = new SampleUser(adminName, orgName, store);
+        adminUser.setEnrollment(userInfo.getEnrollment());
+        adminUser.setEnrollmentSecret(userInfo.getEnrollSecret());
+
+        return adminUser;
+    }
+
 
     public Enrollment enrollUser(SampleUser userToEnroll) throws Exception {
         if(!userToEnroll.isRegistered()){
@@ -83,9 +126,8 @@ public class UserUtils {
         return enrollment;
     }
 
-    private HFCAClient getHFCAClient(NetworkConfig.CAInfo caInfo) throws MalformedURLException, org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException {
+    public HFCAClient getHFCAClient(NetworkConfig.CAInfo caInfo) throws MalformedURLException, org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException {
         HFCAClient hfcaClient = HFCAClient.createNewInstance(caInfo);
-
         return hfcaClient;
     }
 

@@ -1,6 +1,7 @@
 package com.mhc.fabric.client;
 
 import com.mhc.fabric.client.config.FabricConfig;
+import com.mhc.fabric.client.utils.TestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -34,15 +35,6 @@ public class FabricConfigExample {
     }
 
     private FabricConfig getConfig() throws IOException {
-
-        FabricConfig configFromProp = new FabricConfig();
-
-        Resource resource = new ClassPathResource("application.properties");
-        Properties properties = new Properties();
-        properties.load(resource.getInputStream());
-
-        configFromProp.putAll(properties);
-
-        return configFromProp;
+        return TestUtil.getFabricConfig();
     }
 }
