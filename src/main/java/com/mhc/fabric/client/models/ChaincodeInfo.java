@@ -35,4 +35,13 @@ public class ChaincodeInfo {
     public void setChannelName(String channelName) {
         this.channelName = channelName;
     }
+
+    @Override
+    public String toString() {
+        return "ChaincodeInfo{" +
+                "ccName='" + ccName + '\'' +
+                ", ccVersion='" + ccVersion + '\'' +
+                ", channelName='" + channelName + '\'' +
+                '}';
+    }
 }

@@ -11,5 +11,6 @@ public class FabricConfigParams {
     public static final String MHC_FABRIC_NETWORKCONFIG = PRE+"networkConfig";
     public static final String MHC_FABRIC_STORETABLENAME = PRE+"storeTableName";
     public static final String MHC_FABRIC_ORGAFFILIATION = PRE+"orgAffiliation";
+    public static final String MHC_FABRIC_PROPOSALWAITTIME = PRE+"proposalWaitTime";
 }
 
