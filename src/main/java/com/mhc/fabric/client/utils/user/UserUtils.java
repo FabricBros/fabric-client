@@ -38,8 +38,13 @@ public class UserUtils {
         this.fabricConfig = fabricConfig;
     }
 
+    //TODO if member isnt registered/enrolled than techinically the returned member isn't a MEMBER of the network
+    //implememnt checks
     public SampleUser getMember(String user){
-        return null;
+
+        SampleUser member = store.getMember(user, orgName);
+
+        return member;
     }
 
     /** Register's user, should throw exception if user is already registered
@@ -65,6 +70,7 @@ public class UserUtils {
         //TODO figure out ways to implement different types of RR here
 
         newUser.setEnrollmentSecret(getHFCAClient(caInfo).register(rr, admin));
+        newUser.setMspId(mspId);
         return newUser;
 
     }
@@ -131,32 +137,16 @@ public class UserUtils {
         return hfcaClient;
     }
 
-    public static HFClient getHFClient(){
-        HFClient client = HFClient.createNewInstance();
+
+    public static HFClient getHFClient() throws IllegalAccessException, InvocationTargetException, InvalidArgumentException, InstantiationException, NoSuchMethodException, CryptoException, ClassNotFoundException {
+        HFClient hfClient = HFClient.createNewInstance();
         try {
-            client.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
-        } catch (CryptoException e) {
+            hfClient.setCryptoSuite(CryptoSuite.Factory.getCryptoSuite());
+        } catch (CryptoException|InvalidArgumentException|IllegalAccessException|InstantiationException|ClassNotFoundException|NoSuchMethodException|InvocationTargetException e) {
             e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (InvalidArgumentException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-            logger.error(e.getMessage());
+            logger.error(e);
+            throw e;
         }
-        return client;
+        return hfClient;
     }
 }

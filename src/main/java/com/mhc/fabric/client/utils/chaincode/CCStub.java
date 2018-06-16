@@ -5,19 +5,16 @@ import com.mhc.fabric.client.models.ChaincodeInfo;
 import com.mhc.fabric.client.utils.channel.ChannelUtils;
 import org.apache.log4j.Logger;
 import org.hyperledger.fabric.sdk.*;
-import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
-import org.hyperledger.fabric.sdk.exception.NetworkConfigurationException;
-import org.hyperledger.fabric.sdk.exception.ProposalException;
-import org.hyperledger.fabric.sdk.exception.TransactionEventException;
+import org.hyperledger.fabric.sdk.exception.*;
 
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.*;
 
 import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_PROPOSALWAITTIME;
+import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_TRANSACTIONWAITTIME;
 
 public class CCStub {
     static Logger logger = Logger.getLogger(CCStub.class);
@@ -33,7 +30,7 @@ public class CCStub {
     /**
      * Return the string payload
      * **/
-    public String query(HFClient caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws NetworkConfigurationException, InvalidArgumentException, ProposalException {
+    public String query(HFClient caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws NetworkConfigurationException, InvalidArgumentException, ProposalException, TransactionException {
         Collection<ProposalResponse> queryProposals;
         String payLoad;
         logger.debug(String.format("Enter query with fcn %s, caller %s%n args = %s%nchaincodeInfo: %s", fcn, caller.getUserContext().getName(), Arrays.toString(args), chaincodeInfo.toString()));
@@ -63,8 +60,9 @@ public class CCStub {
 
     /**
      * Return the txId
+     * Null if error
      * **/
-    public CompletableFuture<Serializable> invoke(HFClient caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws NetworkConfigurationException, InvalidArgumentException, ProposalException {
+    public CompletableFuture<String> invoke(HFClient caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws NetworkConfigurationException, InvalidArgumentException, ProposalException, TransactionException {
         Collection<ProposalResponse> responses;
 
         logger.debug(String.format("Entered invoke with fcn %s%n args : %s%n caller : %s%n %s", fcn, Arrays.toString(args), caller.getUserContext().getName(), chaincodeInfo.toString()));
@@ -92,27 +90,37 @@ public class CCStub {
         return broadcastTransaction(responses, channel);
     }
 
-    private CompletableFuture<Serializable> broadcastTransaction(Collection<ProposalResponse> responses, Channel channel){
+    private CompletableFuture<String> broadcastTransaction(Collection<ProposalResponse> responses, Channel channel){
         return channel.sendTransaction(responses)
-                .thenApply(transactionEvent -> {
-                    if(transactionEvent.isValid()){
-                        return transactionEvent.getTransactionID();
-                    }else{
-                        return new CompletionException(new Exception("Transaction no valid"));
+//                .get(Integer.parseInt(fabricConfig.getProperty(MHC_FABRIC_TRANSACTIONWAITTIME)),TimeUnit.SECONDS);
+                .thenApply(BlockEvent.TransactionEvent::<String>getTransactionID)
+                .handle((tranEvent, ex) ->{
+                    if(ex != null){
+                        logger.error(ex);
+                        return null;
                     }
-                }).exceptionally(e ->{
-                    if(e instanceof TransactionEventException){
-                        BlockEvent.TransactionEvent te = ((TransactionEventException) e).getTransactionEvent();
-                        if(te != null){
-                            CompletableFuture<Serializable> ret = new CompletableFuture<>();
-                            String msg = String.format("Transaction with TXID %s failed with message %s", te.getTransactionID(), e.getMessage());
-                            logger.error(msg);
-                            return ret.completeExceptionally(new Exception(msg));
-                        }
-                    }
-                    return new CompletionException(new Exception(String.format("Failed with %s exception %s", e.getClass().getName(), e.getMessage())));
-
+                    return tranEvent;
                 });
+//        return channel.sendTransaction(responses)
+//                .thenApply(transactionEvent -> {
+//                    if(transactionEvent.isValid()){
+//                        return transactionEvent.getTransactionID();
+//                    }else{
+//                        return new CompletionException(new Exception("Transaction no valid"));
+//                    }
+//                }).exceptionally(e ->{
+//                    if(e instanceof TransactionEventException){
+//                        BlockEvent.TransactionEvent te = ((TransactionEventException) e).getTransactionEvent();
+//                        if(te != null){
+//                            CompletableFuture<Serializable> ret = new CompletableFuture<>();
+//                            String msg = String.format("Transaction with TXID %s failed with message %s", te.getTransactionID(), e.getMessage());
+//                            logger.error(msg);
+//                            return ret.completeExceptionally(new Exception(msg));
+//                        }
+//                    }
+//                    return new CompletionException(new Exception(String.format("Failed with %s exception %s", e.getClass().getName(), e.getMessage())));
+//
+//                });
     }
 
     private Collection<ProposalResponse> getPeersTransactionResponse(TransactionProposalRequest transactionProposalRequest, Channel channel) throws ProposalException, InvalidArgumentException {
@@ -192,9 +200,15 @@ public class CCStub {
         return responses;
     }
 
-    private Channel getChannelFromConfig(HFClient hfClient, String channelName) throws NetworkConfigurationException, InvalidArgumentException {
+    private Channel getChannelFromConfig(HFClient hfClient, String channelName) throws NetworkConfigurationException, InvalidArgumentException, TransactionException {
         logger.debug("getChannelFromConfig");
-        return ChannelUtils.constructChannel(hfClient, networkConfig, channelName);
+        try {
+            return ChannelUtils.constructChannel(hfClient, networkConfig, channelName);
+        } catch (TransactionException e) {
+            e.printStackTrace();
+            logger.error(e);
+            throw e;
+        }
     }
 
     private QueryByChaincodeRequest getQueryCCReq(QueryByChaincodeRequest queryByChaincodeRequest, String fcn, String[] args, ChaincodeID chaincodeID){

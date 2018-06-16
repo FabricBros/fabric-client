@@ -6,18 +6,19 @@ import org.hyperledger.fabric.sdk.HFClient;
 import org.hyperledger.fabric.sdk.NetworkConfig;
 import org.hyperledger.fabric.sdk.exception.InvalidArgumentException;
 import org.hyperledger.fabric.sdk.exception.NetworkConfigurationException;
+import org.hyperledger.fabric.sdk.exception.TransactionException;
 
 public class ChannelUtils {
     private static Logger logger = Logger.getLogger(ChannelUtils.class);
     //use a cache service to cache channels, initialization of channel has a long latency TODO
 
-    public static Channel constructChannel(HFClient hfClient, NetworkConfig networkConfig, String channelName) throws InvalidArgumentException, NetworkConfigurationException {
+    public static Channel constructChannel(HFClient hfClient, NetworkConfig networkConfig, String channelName) throws InvalidArgumentException, NetworkConfigurationException, TransactionException {
         Channel channel;
         logger.debug("constructing channel");
 
         try {
-            channel = hfClient.loadChannelFromConfig(channelName, networkConfig);
 
+            channel = hfClient.loadChannelFromConfig(channelName, networkConfig);
             if(channel == null){
                 throw new NetworkConfigurationException("Channel "+channelName+" cannot be found.");
             }
@@ -31,6 +32,9 @@ public class ChannelUtils {
             throw e;
         }
 
-        return channel;
+        if(channel.isInitialized()){
+            return channel;
+        }
+        return channel.initialize();
     }
 }

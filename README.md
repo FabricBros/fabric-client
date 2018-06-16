@@ -1,5 +1,9 @@
 # fabric-client
 
+# ENV Setup
+Use Gradle test runner:
+    Preferences > Build, Execution, Deployment > Build tools > Gradle > Runner > Run test using Gradle tests runner
+
 # implementation standards -- Please follow
 - Logger, use Apache log4j.
 

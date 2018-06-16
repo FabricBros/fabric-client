@@ -24,12 +24,6 @@
           "chaincodeQuery": true,
           "ledgerQuery": true,
           "eventSource": true
-        },
-        "peer0.org2.example.com": {
-          "endorsingPeer": true,
-          "chaincodeQuery": false,
-          "ledgerQuery": true,
-          "eventSource": false
         }
       },
       "chaincodes": [
@@ -42,8 +36,7 @@
     "Org1": {
       "mspid": "Org1MSP",
       "peers": [
-        "peer0.org1.example.com",
-        "peer1.org1.example.com"
+        "peer0.org1.example.com"
       ],
       "certificateAuthorities": [
         "ca-org1"
