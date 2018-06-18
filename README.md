@@ -4,6 +4,11 @@
 Use Gradle test runner:
     Preferences > Build, Execution, Deployment > Build tools > Gradle > Runner > Run test using Gradle tests runner
 
+FabricITTest.java requires networkStartup to be up and running with CC
+
+# To install to local Maven
+`./gradlew install`
+
 # implementation standards -- Please follow
 - Logger, use Apache log4j.
 

@@ -7,7 +7,9 @@ import com.mhc.fabric.client.models.SampleStore;
 import com.mhc.fabric.client.models.SampleUser;
 import com.mhc.fabric.client.utils.TestUtil;
 import com.mhc.fabric.client.utils.chaincode.CCStub;
+import com.mhc.fabric.client.utils.channel.ChannelUtils;
 import com.mhc.fabric.client.utils.user.UserUtils;
+import org.hyperledger.fabric.sdk.Channel;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.HFClient;
 import org.hyperledger.fabric.sdk.NetworkConfig;
@@ -46,7 +48,7 @@ public class FabricITTest {
 
     //TODO modify to your specific
     private final String FOO_CHAN = "foo";
-    private final String CC_NAME = "testhuy";
+    private final String CC_NAME = "example20";
     private final String CC_VER = "1";
 
     //TODO modify to your specific CC fcn and args, below is based off of example02 cc
@@ -104,6 +106,7 @@ public class FabricITTest {
 
         assertNotNull(txId);
         //get new client to stimlate thread
+        //query cc
         client = UserUtils.getHFClient();
         client.setUserContext(testUser);
 
@@ -111,7 +114,10 @@ public class FabricITTest {
         assertNotNull(payload);
         out("payload is "+payload);
 
-        //query cc
+        //blockwalker
+        ChannelUtils channelUtils = new ChannelUtils();
+        Channel channelBlock = client.getChannel("foo");
+        channelUtils.blockWalker(client, channelBlock);
     }
 
     private void setup() throws IOException, NetworkConfigurationException, InvalidArgumentException {

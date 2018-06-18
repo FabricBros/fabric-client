@@ -110,7 +110,8 @@ public class UserUtils {
     }
 
 
-    public Enrollment enrollUser(SampleUser userToEnroll) throws Exception {
+    public Enrollment enrollUser(SampleUser userToEnroll) throws MalformedURLException, org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException, EnrollmentException {
+        Enrollment enrollment;
         if(!userToEnroll.isRegistered()){
             throw new IllegalArgumentException("user is not registered");
         }
@@ -120,15 +121,16 @@ public class UserUtils {
         HFCAClient ca;
         try {
             ca = getHFCAClient(networkConfig.getClientOrganization().getCertificateAuthorities().get(0));
-        } catch (MalformedURLException|org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
+
+            enrollment = ca.enroll(userToEnroll.getName(), userToEnroll.getEnrollmentSecret());
+            userToEnroll.setEnrollment(enrollment);
+
+        } catch (EnrollmentException|MalformedURLException|org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException e) {
             e.printStackTrace();
-            logger.error(e.getMessage());
-            throw new Exception(e.getMessage());
+            logger.error(e);
+            throw e;
         }
 
-
-        Enrollment enrollment = ca.enroll(userToEnroll.getName(), userToEnroll.getEnrollmentSecret());
-        userToEnroll.setEnrollment(enrollment);
         return enrollment;
     }
 
