@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 
 import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_NETWORKCONFIG;
+import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_ORGAFFILIATION;
 import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_STORETABLENAME;
 
 public class FabricClientImpl implements FabricClient {
@@ -30,7 +31,7 @@ public class FabricClientImpl implements FabricClient {
     private static Logger logger = Logger.getLogger(FabricClientImpl.class);
     private final String QUERY = "QUERY_TYPE";
     private final String INVOKE = "INVOKE_TYPE";
-    private final String AFFILIATION = "org1.department1";
+    private final String AFFILIATION;
 
     private FabricConfig fabricConfig;
     private NetworkConfig networkConfig;
@@ -41,6 +42,7 @@ public class FabricClientImpl implements FabricClient {
         this.fabricConfig = fabricConfig;
         setup();
         this.org = networkConfig.getClientOrganization().getName();
+        this.AFFILIATION=fabricConfig.getProperty(MHC_FABRIC_ORGAFFILIATION);
     }
 
     @Override
