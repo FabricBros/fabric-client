@@ -46,6 +46,9 @@ jacocoTestReport {
 //    }
 //}
 dependencies {
+    annotationProcessor('org.springframework.boot:spring-boot-autoconfigure-processor')
+    compile('org.springframework.boot:spring-boot-autoconfigure-processor:2.0.3.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter:2.0.3.RELEASE')
     compile('org.hyperledger.fabric-sdk-java:fabric-sdk-java:1.1.0')
     compile('org.apache.commons:commons-configuration2:2.1.1')
     compile('commons-beanutils:commons-beanutils:1.9.3')
