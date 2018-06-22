@@ -92,7 +92,6 @@ public class CCStub {
 
     private CompletableFuture<String> broadcastTransaction(Collection<ProposalResponse> responses, Channel channel){
         return channel.sendTransaction(responses)
-//                .get(Integer.parseInt(fabricConfig.getProperty(MHC_FABRIC_TRANSACTIONWAITTIME)),TimeUnit.SECONDS);
                 .thenApply(BlockEvent.TransactionEvent::<String>getTransactionID)
                 .handle((tranEvent, ex) ->{
                     if(ex != null){

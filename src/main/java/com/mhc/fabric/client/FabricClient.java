@@ -3,6 +3,7 @@ package com.mhc.fabric.client;
 import com.mhc.fabric.client.models.ChaincodeInfo;
 import com.mhc.fabric.client.models.SampleUser;
 import com.mhc.fabric.client.models.UserStoreInfo;
+import org.hyperledger.fabric.sdk.NetworkConfig;
 import org.hyperledger.fabric.sdk.exception.*;
 import org.hyperledger.fabric_ca.sdk.exception.EnrollmentException;
 import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
@@ -38,4 +39,15 @@ public interface FabricClient {
      * **/
     SampleUser addMemberToNetwork(String name, String pw) throws org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException, MalformedURLException, RegistrationException, EnrollmentException;
 
+    /**
+     * @param member member of network
+     * @return true if member is registered
+     * **/
+    boolean hasMember(String member) throws InvalidArgumentException;
+
+
+    /**
+     * @return networkConfig
+     * **/
+    NetworkConfig getNetworkConfig();
 }

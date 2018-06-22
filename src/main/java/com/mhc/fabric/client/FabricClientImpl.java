@@ -97,7 +97,17 @@ public class FabricClientImpl implements FabricClient {
         return newUser;
     }
 
-    private boolean hasMember(String user) throws InvalidArgumentException {
+    @Override
+    public boolean hasMember(String member) throws InvalidArgumentException {
+        return hasMemberHelper(member);
+    }
+
+    @Override
+    public NetworkConfig getNetworkConfig() {
+        return this.networkConfig;
+    }
+
+    private boolean hasMemberHelper(String user) throws InvalidArgumentException {
         if(sampleStore.hasMember(user, org) && sampleStore.getMember(user, org).isEnrolled()){
             return true;
         }else{
@@ -110,6 +120,7 @@ public class FabricClientImpl implements FabricClient {
         try {
 
             this.networkConfig = NetworkConfig.fromJsonStream(resource.getInputStream());
+            //TODO reimplement when repository package is complete
             File file = new File(fabricConfig.getProperty(MHC_FABRIC_STORETABLENAME));
             this.sampleStore = new SampleStore(file);
 
