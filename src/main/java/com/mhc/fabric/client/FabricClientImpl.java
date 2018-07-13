@@ -121,8 +121,10 @@ public class FabricClientImpl implements FabricClient {
 
             this.networkConfig = NetworkConfig.fromJsonStream(resource.getInputStream());
             //TODO reimplement when repository package is complete
-            File file = new File(fabricConfig.getProperty(MHC_FABRIC_STORETABLENAME));
-            this.sampleStore = new SampleStore(file);
+
+            File tempFile = File.createTempFile(fabricConfig.getProperty(MHC_FABRIC_STORETABLENAME), ".tmp");
+            tempFile.deleteOnExit();
+            this.sampleStore = new SampleStore(tempFile);
 
         }catch(IOException | InvalidArgumentException | NetworkConfigurationException e){
             logger.error("Network Config not found!!!! Critical!");
