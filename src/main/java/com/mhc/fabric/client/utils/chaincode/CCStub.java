@@ -21,10 +21,12 @@ public class CCStub {
 
     private FabricConfig fabricConfig;
     private NetworkConfig networkConfig;
+    private ChannelUtils channelUtils;
 
     public CCStub(FabricConfig fabricConfig, NetworkConfig networkConfig){
         this.fabricConfig = fabricConfig;
         this.networkConfig = networkConfig;
+        this.channelUtils = ChannelUtils.getInstance();
     }
 
     /**
@@ -202,7 +204,7 @@ public class CCStub {
     private Channel getChannelFromConfig(HFClient hfClient, String channelName) throws NetworkConfigurationException, InvalidArgumentException, TransactionException {
         logger.debug("getChannelFromConfig");
         try {
-            return ChannelUtils.constructChannel(hfClient, networkConfig, channelName);
+            return channelUtils.constructChannel(hfClient, networkConfig, channelName);
         } catch (TransactionException e) {
             e.printStackTrace();
             logger.error(e);
