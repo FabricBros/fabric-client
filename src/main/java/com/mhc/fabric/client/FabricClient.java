@@ -10,6 +10,7 @@ import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public interface FabricClient {
@@ -30,7 +31,7 @@ public interface FabricClient {
      * @param args chaincode function args
      * @param chaincodeInfo channel, ccname, ccver package
      * **/
-    String invoke(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws TransactionException, InstantiationException, InvocationTargetException, NoSuchMethodException, InterruptedException, IllegalAccessException, InvalidArgumentException, ExecutionException, NetworkConfigurationException, CryptoException, ClassNotFoundException, ProposalException;
+    CompletableFuture<String> invoke(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws TransactionException, InstantiationException, InvocationTargetException, NoSuchMethodException, InterruptedException, IllegalAccessException, InvalidArgumentException, ExecutionException, NetworkConfigurationException, CryptoException, ClassNotFoundException, ProposalException;
 
     /**@param name  name of user
      * @param pw    secret

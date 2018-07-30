@@ -15,11 +15,13 @@ import org.hyperledger.fabric_ca.sdk.exception.EnrollmentException;
 import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.mhc.fabric.client.config.FabricConfigParams.MHC_FABRIC_NETWORKCONFIG;
@@ -47,16 +49,16 @@ public class FabricClientImpl implements FabricClient {
 
     @Override
     public String query(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws IllegalAccessException, InvalidArgumentException, InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, CryptoException, TransactionException, ProposalException, NetworkConfigurationException, ExecutionException, InterruptedException {
-        return fcnHelper(caller, fcn, args, chaincodeInfo, QUERY);
+        return fcnHelper(caller, fcn, args, chaincodeInfo, QUERY).get();
     }
 
     @Override
-    public String invoke(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws TransactionException, InstantiationException, InvocationTargetException, NoSuchMethodException, InterruptedException, IllegalAccessException, InvalidArgumentException, ExecutionException, NetworkConfigurationException, CryptoException, ClassNotFoundException, ProposalException {
+    public CompletableFuture<String> invoke(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo) throws TransactionException, InstantiationException, InvocationTargetException, NoSuchMethodException, InterruptedException, IllegalAccessException, InvalidArgumentException, ExecutionException, NetworkConfigurationException, CryptoException, ClassNotFoundException, ProposalException {
         return fcnHelper(caller, fcn, args, chaincodeInfo, INVOKE);
     }
 
-    private String fcnHelper(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo, String type) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, InvalidArgumentException, NetworkConfigurationException, CryptoException, ClassNotFoundException, TransactionException, ProposalException, ExecutionException, InterruptedException {
-        String str;
+    private CompletableFuture<String> fcnHelper(String caller, String fcn, String[] args, ChaincodeInfo chaincodeInfo, String type) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, InvalidArgumentException, NetworkConfigurationException, CryptoException, ClassNotFoundException, TransactionException, ProposalException, ExecutionException, InterruptedException {
+        CompletableFuture<String> str;
         try{
             hasMember(caller);
             HFClient hfClient = UserUtils.getHFClient();
@@ -66,12 +68,13 @@ public class FabricClientImpl implements FabricClient {
             CCStub ccStub = new CCStub(fabricConfig, networkConfig);
 
             if(type.equals(QUERY)){
-                str = ccStub.query(hfClient, fcn, args, chaincodeInfo);
+//                str = ccStub.query(hfClient, fcn, args, chaincodeInfo);
+                str = CompletableFuture.completedFuture(ccStub.query(hfClient, fcn, args, chaincodeInfo));
             }else{
-                str = ccStub.invoke(hfClient, fcn, args, chaincodeInfo).get();
+                str = ccStub.invoke(hfClient, fcn, args, chaincodeInfo);
             }
 
-        }catch(InterruptedException|ExecutionException |TransactionException |ProposalException |NetworkConfigurationException|InstantiationException|InvocationTargetException|NoSuchMethodException|IllegalAccessException|InvalidArgumentException|CryptoException|ClassNotFoundException e){
+        }catch(TransactionException |ProposalException |NetworkConfigurationException|InstantiationException|InvocationTargetException|NoSuchMethodException|IllegalAccessException|InvalidArgumentException|CryptoException|ClassNotFoundException e){
             logger.error(e);
             throw e;
         }
