@@ -39,6 +39,7 @@ public class FabricClientImpl implements FabricClient {
     private NetworkConfig networkConfig;
     private SampleStore sampleStore;
     private String org;
+    private CCStub ccStub;
 
     public FabricClientImpl(FabricConfig fabricConfig) throws NetworkConfigurationException, IOException, InvalidArgumentException {
         this.fabricConfig = fabricConfig;
@@ -65,7 +66,7 @@ public class FabricClientImpl implements FabricClient {
             SampleUser invoker = sampleStore.getMember(caller, org);
 
             hfClient.setUserContext(invoker);
-            CCStub ccStub = new CCStub(fabricConfig, networkConfig);
+//            CCStub ccStub = new CCStub(fabricConfig, networkConfig);
 
             if(type.equals(QUERY)){
 //                str = ccStub.query(hfClient, fcn, args, chaincodeInfo);
@@ -128,6 +129,7 @@ public class FabricClientImpl implements FabricClient {
             File tempFile = File.createTempFile(fabricConfig.getProperty(MHC_FABRIC_STORETABLENAME), ".tmp");
             tempFile.deleteOnExit();
             this.sampleStore = new SampleStore(tempFile);
+            this.ccStub = new CCStub(fabricConfig, networkConfig);
 
         }catch(IOException | InvalidArgumentException | NetworkConfigurationException e){
             logger.error("Network Config not found!!!! Critical!");
