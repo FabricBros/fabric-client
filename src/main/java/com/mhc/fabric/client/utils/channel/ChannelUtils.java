@@ -12,6 +12,7 @@ import org.hyperledger.fabric.sdk.exception.NetworkConfigurationException;
 import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.exception.TransactionException;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
+import org.hyperledger.fabric_ca.sdk.HFCAClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -51,16 +52,26 @@ public class ChannelUtils {
         return channels.get(chanName);
     }
 
+    private String getChannelKey(HFClient hfClient, String channelName){
+        return hfClient.getUserContext().getName()+"_"+channelName;
+    }
+
     public Channel constructChannel(HFClient hfClient, NetworkConfig networkConfig, String channelName) throws InvalidArgumentException, NetworkConfigurationException, TransactionException {
-        if(channels.containsKey(channelName)){
-            return channels.get(channelName);
+        String channelKey = getChannelKey(hfClient, channelName);
+
+        if(channels.containsKey(channelKey)){
+
+            logger.debug("Found channel : "+channelKey);
+            return channels.get(channelKey);
         }
+
 
         Channel channel;
         logger.debug("constructing channel");
 
         try {
 
+            logger.debug("Creating new channel : "+channelKey);
             channel = hfClient.loadChannelFromConfig(channelName, networkConfig);
             if(channel == null){
                 throw new NetworkConfigurationException("Channel "+channelName+" cannot be found.");
@@ -78,8 +89,8 @@ public class ChannelUtils {
         if(channel.isInitialized()){
             return channel;
         }
-        channels.put(channelName, channel.initialize());
-        return channels.get(channelName);
+        channels.put(channelKey, channel.initialize());
+        return channels.get(channelKey);
     }
 
     //TODO build a blockinfo pojo and add to list
