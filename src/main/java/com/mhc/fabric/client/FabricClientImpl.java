@@ -125,7 +125,8 @@ public class FabricClientImpl implements FabricClient {
         Resource resource = new ClassPathResource(fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG));
         File networkFile = null;
         boolean isAbFile = false;
-        if(!resource.isFile()){
+
+        if(!resource.exists()){
             logger.info("resource "+fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG)+" not found in classpath resource");
             networkFile = new File(fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG));
             logger.info("Got file at "+networkFile.getAbsolutePath());
