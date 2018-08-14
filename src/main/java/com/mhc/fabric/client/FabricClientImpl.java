@@ -18,7 +18,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Async;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.util.concurrent.CompletableFuture;
@@ -121,9 +123,22 @@ public class FabricClientImpl implements FabricClient {
 
     private void setup() throws IOException, NetworkConfigurationException, InvalidArgumentException {
         Resource resource = new ClassPathResource(fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG));
+        File networkFile = null;
+        boolean isAbFile = false;
+        if(!resource.isFile()){
+            logger.info("resource "+fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG)+" not found in classpath resource");
+            networkFile = new File(fabricConfig.getProperty(MHC_FABRIC_NETWORKCONFIG));
+            logger.info("Got file at "+networkFile.getAbsolutePath());
+            isAbFile = true;
+        }
         try {
 
-            this.networkConfig = NetworkConfig.fromJsonStream(resource.getInputStream());
+            if(isAbFile){
+                this.networkConfig = NetworkConfig.fromJsonStream(new FileInputStream(networkFile));
+            }else{
+                this.networkConfig = NetworkConfig.fromJsonStream(resource.getInputStream());
+            }
+//            this.networkConfig = NetworkConfig.fromJsonStream(resource.getInputStream());
             //TODO reimplement when repository package is complete
 
             File tempFile = File.createTempFile(fabricConfig.getProperty(MHC_FABRIC_STORETABLENAME), ".tmp");
